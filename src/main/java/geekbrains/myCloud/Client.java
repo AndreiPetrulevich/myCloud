@@ -1,5 +1,6 @@
 package geekbrains.myCloud;
 
+import geekbrains.myCloud.core.Rethrow;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListView;
@@ -15,6 +16,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class Client implements Initializable {
     public ListView<String> serverView;
@@ -25,7 +27,7 @@ public class Client implements Initializable {
     private static final int SIZE = 2048;
     private DataInputStream is;
     private DataOutputStream os;
-    private Path clientDir;
+    private Optional<Path> clientDir = null;
     private byte[] buf;
 
     @Override
@@ -51,7 +53,7 @@ public class Client implements Initializable {
                 String command = is.readUTF();
                 System.out.println("received command: " + command);
                 if(command.equals("#file#")) {
-                    Sender.getFile(is, clientDir, SIZE, buf);
+                    Rethrow.of(clientDir).ifPresent(path -> Sender.getFile(is, path, SIZE, buf));
                     Platform.runLater(this::updateClientView);
                 } else if (command.equals("#list#")) {
                     Platform.runLater(() -> serverView.getItems().clear());
@@ -70,7 +72,7 @@ public class Client implements Initializable {
 
     public void uploadFile(ActionEvent actionEvent) throws IOException {
         String fileName = clientView.getSelectionModel().getSelectedItem();
-        Sender.sendFile(fileName, os, clientDir);
+        Rethrow.of(clientDir).ifPresent(path -> Sender.sendFile(fileName, os, path));
     }
 
     public void downloadFile(ActionEvent actionEvent) throws IOException {
@@ -88,10 +90,10 @@ public class Client implements Initializable {
 
     public Path asDirectoryPath() {
         FileChooser choose = new FileChooser();
-        choose.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "."));
+        choose.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
         String filePath = choose.showOpenDialog(null).getAbsolutePath();
         Path parentPath = Paths.get(filePath).getParent();
-        clientDir = parentPath;
+        clientDir = Optional.of(parentPath);
         Platform.runLater(() -> {
             clientFilePath.appendText(parentPath.toString());
         });
@@ -101,9 +103,11 @@ public class Client implements Initializable {
     public void updateClientView() {
         try {
             clientView.getItems().clear();
-            Files.list(clientDir)
-                    .map(p -> p.getFileName().toString())
-                    .forEach(f -> clientView.getItems().add(f));
+            Rethrow.of(clientDir).ifPresent(path -> {
+                Files.list(path)
+                        .map(p -> p.getFileName().toString())
+                        .forEach(f -> clientView.getItems().add(f));
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
