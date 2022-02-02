@@ -3,18 +3,32 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="410.0" prefWidth="563.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400" minWidth="600" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="geekbrains.myCloud.Client">
-   <children>
-      <ListView fx:id="clientView" layoutX="32.0" layoutY="60.0" prefHeight="330.0" prefWidth="200.0" />
-      <ListView fx:id="serverView" layoutX="334.0" layoutY="60.0" prefHeight="330.0" prefWidth="200.0" />
-      <Button layoutX="271.0" layoutY="164.0" mnemonicParsing="false" onAction="#uploadFile" text="&gt;" />
-      <Button layoutX="271.0" layoutY="218.0" mnemonicParsing="false" onAction="#downloadFile" text="&lt;" />
-      <Button layoutX="188.0" layoutY="24.0" mnemonicParsing="false" onAction="#clientPathLevelUp" text="back" />
-      <Button layoutX="490.0" layoutY="24.0" mnemonicParsing="false" onAction="#serverPathLevelUp" text="back" />
-      <TextField fx:id="clientFilePath" onMouseClicked="#asDirectoryPath" layoutX="32.0" layoutY="24.0" prefHeight="26.0" prefWidth="150.0" />
-      <TextField fx:id="serverFilePath" onMouseClicked="#asDirectoryPath" layoutX="334.0" layoutY="24.0" prefHeight="26.0" prefWidth="150.0" />
-   </children>
-</AnchorPane>
+   <center>
+      <HBox spacing="8" style="-fx-padding: 8 8 8 8;">
+         <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <HBox spacing="8">
+               <TextField fx:id="clientFilePath" HBox.hgrow="ALWAYS" onMouseClicked="#selectClientDir" prefHeight="26.0" prefWidth="150.0" />
+               <Button mnemonicParsing="false" onAction="#clientPathLevelUp" text="&#9757;" />
+            </HBox>
+            <ListView fx:id="clientView" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
+         </VBox>
+         <VBox alignment="CENTER" spacing="8">
+            <Button mnemonicParsing="false" onAction="#uploadFile" text="&#9654;" />
+            <Button mnemonicParsing="false" onAction="#downloadFile" text="&#9664;" />
+         </VBox>
+         <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <HBox spacing="8">
+               <TextField fx:id="serverFilePath" HBox.hgrow="ALWAYS" onMouseClicked="#selectServerDir" prefHeight="26.0" prefWidth="150.0" />
+               <Button mnemonicParsing="false" onAction="#serverPathLevelUp" text="&#9757;" />
+            </HBox>
+            <ListView fx:id="serverView" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
+         </VBox>
+      </HBox>
+   </center>
+</BorderPane>

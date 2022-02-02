@@ -15,6 +15,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent parent = FXMLLoader.load(getClass().getResource("myCloudLayout.fxml"));
+        stage.setMinHeight(416);
+        stage.setMinWidth(616);
         stage.setScene(new Scene(parent));
         stage.show();
 
