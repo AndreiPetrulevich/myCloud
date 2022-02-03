@@ -16,7 +16,7 @@
                <TextField fx:id="clientFilePath" HBox.hgrow="ALWAYS" onMouseClicked="#selectClientDir" prefHeight="26.0" prefWidth="150.0" />
                <Button mnemonicParsing="false" onAction="#clientPathLevelUp" text="&#9757;" />
             </HBox>
-            <ListView fx:id="clientView" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
+            <ListView fx:id="clientFilesList" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
          </VBox>
          <VBox alignment="CENTER" spacing="8">
             <Button mnemonicParsing="false" onAction="#uploadFile" text="&#9654;" />
@@ -24,10 +24,10 @@
          </VBox>
          <VBox spacing="8" HBox.hgrow="ALWAYS">
             <HBox spacing="8">
-               <TextField fx:id="serverFilePath" HBox.hgrow="ALWAYS" onMouseClicked="#selectServerDir" prefHeight="26.0" prefWidth="150.0" />
-               <Button mnemonicParsing="false" onAction="#serverPathLevelUp" text="&#9757;" />
+               <TextField fx:id="serverFilePath" disable="true" HBox.hgrow="ALWAYS" prefHeight="26.0" prefWidth="150.0" />
+               <Button fx:id="serverPathUpButton" mnemonicParsing="false" onAction="#serverPathLevelUp" text="&#9757;" />
             </HBox>
-            <ListView fx:id="serverView" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
+            <ListView fx:id="serverFilesList" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
          </VBox>
       </HBox>
    </center>

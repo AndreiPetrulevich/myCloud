@@ -1,16 +1,17 @@
 package geekbrains.myCloud;
 
-import geekbrains.myCloud.core.Rethrow;
+import geekbrains.myCloud.core.*;
+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -21,28 +22,26 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 public class Client implements Initializable {
-    public ListView<String> serverView;
-    public ListView<String> clientView;
+    public ListView<String> serverFilesList;
+    public ListView<String> clientFilesList;
     public TextField clientFilePath;
     public TextField serverFilePath;
+    public Button serverPathUpButton;
 
-    private static final int SIZE = 2048;
-    private DataInputStream is;
-    private DataOutputStream os;
+    private ObjectDecoderInputStream is;
+    private ObjectEncoderOutputStream os;
     private Optional<Path> clientDir = null;
     private Optional<Path> serverDir = null;
-    private byte[] buf;
     private Stage primaryStage;
 
     @Override
     public void initialize() {
         try {
-            buf = new byte[SIZE];
             primaryStage = new Stage();
-            serverDir = Optional.of(Paths.get("data"));
+            initMouseListeners();
             Socket socket = new Socket("localhost", 8190);
-            is = new DataInputStream(socket.getInputStream());
-            os = new DataOutputStream(socket.getOutputStream());
+            os = new ObjectEncoderOutputStream(socket.getOutputStream());
+            is = new ObjectDecoderInputStream(socket.getInputStream());
             var readThread = new Thread(this::readLoop);
             readThread.setDaemon(true);
             readThread.start();
@@ -56,36 +55,47 @@ public class Client implements Initializable {
     private void readLoop() {
         try {
             while(true) {
-                String command = is.readUTF();
-                System.out.println("received command: " + command);
-                if(command.equals("#file#")) {
-                    Rethrow.of(clientDir).ifPresent(path -> Sender.getFile(is, path, SIZE, buf));
-                    Platform.runLater(this::updateClientUI);
-                } else if (command.equals("#list#")) {
-                    Platform.runLater(() -> serverView.getItems().clear());
-                    int filesCount = is.readInt();
-                    for (int i = 0; i < filesCount; i++) {
-                        String fileName = is.readUTF();
-                        Platform.runLater(() -> serverView.getItems().add(fileName));
-                    }
+                CloudMessage message = (CloudMessage) is.readObject();
+
+                switch (message.getType()) {
+                    case FILE -> processFileMessage((FileMessage) message);
+                    case LIST -> processListMessage((ListMessage) message);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
 
+    private void processListMessage(ListMessage message) {
+        serverDir = Optional.of(message.getPath());
+        Platform.runLater(() -> {
+            Path rootPath = Path.of("/");
+            serverFilePath.setText(message.getPath().toString());
+            serverPathUpButton.setDisable(serverDir.orElse(rootPath).equals(rootPath));
+            serverFilesList.getItems().clear();
+            serverFilesList.getItems().addAll(message.getFiles());
+        });
+    }
+
+    private void processFileMessage(FileMessage message) throws IOException {
+        Optional<Path> fullPath = clientDir.map(p -> p.resolve(message.getFileName()));
+        Rethrow.of(fullPath).ifPresent(path -> {
+            Files.write(path, message.getBytes());
+        });
+        Platform.runLater(this::updateClientUI);
+    }
+
+
     public void uploadFile(ActionEvent actionEvent) throws IOException {
-        String fileName = clientView.getSelectionModel().getSelectedItem();
-        Rethrow.of(clientDir).ifPresent(path -> Sender.sendFile(fileName, os, path));
+        String fileName = clientFilesList.getSelectionModel().getSelectedItem();
+        os.writeObject(new FileMessage(clientDir.get().resolve(fileName)));
     }
 
     public void downloadFile(ActionEvent actionEvent) throws IOException {
-        String fileName = serverView.getSelectionModel().getSelectedItem();
-        os.writeUTF("#get_file#");
-        os.writeUTF(fileName);
-        os.flush();
+        String fileName = serverFilesList.getSelectionModel().getSelectedItem();
+        os.writeObject(new FileRequest(fileName));
     }
 
     public void clientPathLevelUp(ActionEvent actionEvent) {
@@ -94,15 +104,6 @@ public class Client implements Initializable {
     }
 
     public void serverPathLevelUp(ActionEvent actionEvent) {
-        serverDir = getParentPath(serverFilePath);
-        updateServerUI();
-    }
-
-    private void updateUIForPath(TextField field, Optional<Path> path, ListView<String> view) {
-        path.ifPresent(p -> {
-            field.setText(p.toString());
-            updateView(view, path);
-        });
     }
 
     private Optional<Path> getParentPath(TextField field) {
@@ -122,11 +123,6 @@ public class Client implements Initializable {
         updateClientUI();
     }
 
-    public void selectServerDir() {
-        serverDir = selectDir();
-        updateServerUI();
-    }
-
     private Optional<Path> selectDir() {
         DirectoryChooser chooseDir = new DirectoryChooser();
         chooseDir.setTitle("Upload file path");
@@ -134,24 +130,45 @@ public class Client implements Initializable {
         return file.map(f -> Paths.get(f.getAbsolutePath()));
     }
 
-    private void updateServerUI() {
-        updateUIForPath(serverFilePath, serverDir, serverView);
-    }
-
     private void updateClientUI() {
-        updateUIForPath(clientFilePath, clientDir, clientView);
-    }
+        clientDir.ifPresent(p -> {
+            clientFilePath.setText(p.toString());
 
-    private void updateView(ListView<String> view, Optional<Path> path) {
-        try {
-            view.getItems().clear();
-            Rethrow.of(path).ifPresent(p -> {
+            try {
+                clientFilesList.getItems().clear();
                 Files.list(p)
                         .map(a -> a.getFileName().toString())
-                        .forEach(f -> view.getItems().add(f));
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                        .forEach(f -> clientFilesList.getItems().add(f));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void initMouseListeners() {
+        clientFilesList.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                clientDir
+                        .map(p -> p.resolve(getItem()))
+                        .filter(Files::isDirectory)
+                        .ifPresent(p -> {
+                            clientDir = Optional.of(p);
+                            Platform.runLater(this::updateClientUI);
+                        });
+            }
+        });
+
+        serverFilesList.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+
+            }
+        });
+    }
+
+    private String getItem() {
+        return clientFilesList.getSelectionModel().getSelectedItem();
+    }
+
+    public void reconnect(ActionEvent actionEvent) {
     }
 }

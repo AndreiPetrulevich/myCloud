@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Data
-public class FileMessage implements CloudMessage{
+public class FileMessage implements CloudMessage {
     private final String fileName;
     private final byte[] bytes;
 
