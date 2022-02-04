@@ -1,17 +1,15 @@
 package geekbrains.myCloud.core;
 
-import java.nio.file.Path;
+public class GoToDir implements CloudMessage {
 
-public class GoToDir implements CloudMessage{
-
-    private final Path directory;
+    private final String directory;
 
 
-    public GoToDir(Path directory) {
+    public GoToDir(String directory) {
         this.directory = directory;
     }
 
-    public Path getDirectory() {
+    public String getDirectory() {
         return directory;
     }
 

@@ -15,14 +15,14 @@ public class ListMessage implements CloudMessage {
     private final List<String> files;
 
     public ListMessage(Path path) throws IOException {
-        this.path = path.relativize(Paths.get("data")).toString();
+        this.path = Paths.get("data").relativize(path).normalize().toString();
         files = Files.list(path)
                 .map(p -> p.getFileName().toString())
                 .collect(Collectors.toList());
     }
 
-    public Path getPath() {
-        return Path.of(path);
+    public String getPath() {
+        return path;
     }
 
     @Override

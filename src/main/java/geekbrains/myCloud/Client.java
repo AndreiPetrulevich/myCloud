@@ -31,8 +31,10 @@ public class Client implements Initializable {
     private ObjectDecoderInputStream is;
     private ObjectEncoderOutputStream os;
     private Optional<Path> clientDir = null;
-    private Optional<Path> serverDir = null;
+    private String serverDir = SERVER_ROOT_PATH;
     private Stage primaryStage;
+
+    private static final String SERVER_ROOT_PATH = "";
 
     @Override
     public void initialize() {
@@ -69,11 +71,10 @@ public class Client implements Initializable {
 
 
     private void processListMessage(ListMessage message) {
-        serverDir = Optional.of(message.getPath());
+        serverDir = message.getPath();
         Platform.runLater(() -> {
-            Path rootPath = Path.of("/");
-            serverFilePath.setText(message.getPath().toString());
-            serverPathUpButton.setDisable(serverDir.orElse(rootPath).equals(rootPath));
+            serverFilePath.setText(message.getPath());
+            serverPathUpButton.setDisable(serverDir.equals(SERVER_ROOT_PATH));
             serverFilesList.getItems().clear();
             serverFilesList.getItems().addAll(message.getFiles());
         });
@@ -104,13 +105,14 @@ public class Client implements Initializable {
     }
 
     public void serverPathLevelUp(ActionEvent actionEvent) {
+        Optional<Path> pathToSend = getParentPath(serverFilePath);
+        changeServerDir(pathToSend.map(p -> p.toString()).orElse(SERVER_ROOT_PATH));
     }
 
     private Optional<Path> getParentPath(TextField field) {
         if (field != null) {
             try {
-                Path parentPath = Paths.get(field.getText()).getParent();
-                return Optional.of(parentPath);
+                return Optional.ofNullable(Paths.get(field.getText()).getParent());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -149,7 +151,7 @@ public class Client implements Initializable {
         clientFilesList.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 clientDir
-                        .map(p -> p.resolve(getItem()))
+                        .map(p -> p.resolve(getItem(clientFilesList)))
                         .filter(Files::isDirectory)
                         .ifPresent(p -> {
                             clientDir = Optional.of(p);
@@ -160,15 +162,21 @@ public class Client implements Initializable {
 
         serverFilesList.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-
+                Path newPath = Path.of(serverDir).resolve(getItem(serverFilesList));
+                changeServerDir(newPath.toString());
             }
         });
     }
 
-    private String getItem() {
-        return clientFilesList.getSelectionModel().getSelectedItem();
+    private String getItem(ListView<String> view) {
+        return view.getSelectionModel().getSelectedItem();
     }
 
-    public void reconnect(ActionEvent actionEvent) {
+    private void changeServerDir(String path) {
+        try {
+            os.writeObject(new GoToDir(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
