@@ -21,7 +21,7 @@ public final class Sender {
     }
 
     static void sendFile(String fileName, DataOutputStream os, Path serverDir) throws IOException {
-        os.writeUTF("#File#");
+        os.writeUTF("#file#");
         os.writeUTF(fileName);
         Path filePath = serverDir.resolve(fileName);
         long fileSize = Files.size(filePath);
