@@ -4,5 +4,7 @@ public enum CommandType {
     FILE,
     FILE_REQUEST,
     LIST,
-    GO_TO
+    GO_TO,
+    DELETE,
+    RENAME
 }

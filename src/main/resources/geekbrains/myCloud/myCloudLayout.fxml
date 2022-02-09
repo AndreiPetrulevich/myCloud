@@ -27,7 +27,7 @@
                <TextField fx:id="serverFilePath" disable="true" HBox.hgrow="ALWAYS" prefHeight="26.0" prefWidth="150.0" />
                <Button fx:id="serverPathUpButton" mnemonicParsing="false" onAction="#serverPathLevelUp" text="&#9757;" />
             </HBox>
-            <ListView fx:id="serverFilesList" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/>
+            <ListView fx:id="serverFilesList" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" editable="true"/>
          </VBox>
       </HBox>
    </center>

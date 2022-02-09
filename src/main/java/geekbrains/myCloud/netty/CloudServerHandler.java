@@ -29,6 +29,8 @@ public class CloudServerHandler extends SimpleChannelInboundHandler<CloudMessage
                 sendList(ctx, CURRENT_DIR);
             }
             case GO_TO -> processGoToDir((GoToDir) cloudMessage, ctx);
+            case RENAME -> processFileRename((FileRename) cloudMessage, ctx);
+            case DELETE -> deleteFile((FileDelete)cloudMessage, ctx);
         }
     }
 
@@ -51,6 +53,29 @@ public class CloudServerHandler extends SimpleChannelInboundHandler<CloudMessage
         try {
             sendList(ctx, path);
         } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void processFileRename(FileRename command, ChannelHandlerContext ctx) {
+        Path oldFileNamePath = CURRENT_DIR.resolve(command.getOldFileNamePath());
+        Path newFileNamePath = CURRENT_DIR.resolve(command.getNewFileNamePath());
+        if (Files.exists(oldFileNamePath)) {
+            try {
+                Files.move(oldFileNamePath, newFileNamePath);
+                sendList(ctx, newFileNamePath.getParent());
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void deleteFile(FileDelete cloudMessage, ChannelHandlerContext ctx) {
+        Path path = CURRENT_DIR.resolve(cloudMessage.getPathToDeleteFile());
+        try {
+            Files.delete(path);
+            sendList(ctx, path.getParent());
+        } catch (IOException | InterruptedException  e) {
             e.printStackTrace();
         }
     }
