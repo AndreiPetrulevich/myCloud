@@ -40,13 +40,14 @@ public class Client implements Initializable {
     public void initialize() {
         try {
             primaryStage = new Stage();
-            initMouseListeners();
             Socket socket = new Socket("localhost", 8190);
             os = new ObjectEncoderOutputStream(socket.getOutputStream());
             is = new ObjectDecoderInputStream(socket.getInputStream());
             var readThread = new Thread(this::readLoop);
             readThread.setDaemon(true);
             readThread.start();
+
+            initMouseListeners();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -106,7 +107,7 @@ public class Client implements Initializable {
 
     public void serverPathLevelUp(ActionEvent actionEvent) {
         Optional<Path> pathToSend = getParentPath(serverFilePath);
-        changeServerDir(pathToSend.map(p -> p.toString()).orElse(SERVER_ROOT_PATH));
+        changeServerDir(pathToSend.map(Path::toString).orElse(SERVER_ROOT_PATH));
     }
 
     private Optional<Path> getParentPath(TextField field) {
@@ -165,6 +166,26 @@ public class Client implements Initializable {
                 Path newPath = Path.of(serverDir).resolve(getItem(serverFilesList));
                 changeServerDir(newPath.toString());
             }
+        });
+
+        serverFilesList.setCellFactory(lv -> {
+            FileCell cell = new FileCell(pair -> {
+                try {
+                    Path oldPath = Path.of(serverDir).resolve(pair.oldName);
+                    Path newPath = Path.of(serverDir).resolve(pair.newName);
+                    os.writeObject(new FileRename(oldPath.toString(), newPath.toString()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }, f -> {
+                Path pathToDeleteFile = Path.of(serverDir).resolve(f);
+                try {
+                    os.writeObject(new FileDelete(pathToDeleteFile.toString()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            return cell;
         });
     }
 
