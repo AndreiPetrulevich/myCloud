@@ -2,13 +2,13 @@ version: '3.7'
 services:
   mongodb-conteiner:
     image: mongo:latest
-    envirinment:
+    environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: cloudPassword
     ports:
-      - 27017:27017  - первый порт - тут я указываю lockalhost?
+      - 27017:27017
     volumes:
-      - mongodb_data_conteiner: /data/db  - тутдолжна быть директория для бд
+      - mongodb_data_conteiner: /data/db
 
 volumes:
   mongodb_data_conteiner:

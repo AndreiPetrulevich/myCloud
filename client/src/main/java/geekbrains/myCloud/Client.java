@@ -10,7 +10,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public class Client implements Initializable {
+public class Client {
     public ListView<String> serverFilesList;
     public ListView<String> clientFilesList;
     public TextField clientFilePath;
@@ -36,7 +35,6 @@ public class Client implements Initializable {
 
     private static final String SERVER_ROOT_PATH = "";
 
-    @Override
     public void initialize() {
         try {
             primaryStage = new Stage();
