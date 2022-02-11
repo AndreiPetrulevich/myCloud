@@ -6,7 +6,13 @@
 
     <groupId>org.example</groupId>
     <artifactId>myCloud</artifactId>
+    <packaging>pom</packaging>
     <version>1</version>
+    <modules>
+        <module>server</module>
+        <module>core</module>
+        <module>client</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>15</maven.compiler.source>
@@ -53,7 +59,7 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <!--<build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -84,6 +90,6 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
 
 </project>
