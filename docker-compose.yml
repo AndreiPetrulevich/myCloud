@@ -1,14 +1,24 @@
 version: '3.7'
 services:
-  mongodb-conteiner:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: cloudPassword
+  app:
+    env_file:
+      - .env
+    build:
+      dockerfile: Dockerfile
     ports:
-      - 27017:27017
+      - "8190:8190"
     volumes:
-      - mongodb_data_conteiner: /data/db
+      - app_data:/app/data
+
+  db:
+    image: mongo:latest
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    volumes:
+      - db_data:/data/db
 
 volumes:
-  mongodb_data_conteiner:
+  app_data:
+  db_data:

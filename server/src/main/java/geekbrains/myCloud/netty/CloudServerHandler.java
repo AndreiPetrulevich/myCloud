@@ -35,12 +35,13 @@ public class CloudServerHandler extends SimpleChannelInboundHandler<CloudMessage
     }
 
     private void sendList(ChannelHandlerContext ctx, Path path) throws IOException, InterruptedException {
+        log.debug("Write and flush list for" + path.toString());
         ctx.writeAndFlush(new ListMessage(path));
-        log.debug("Write and flush dir list");
     }
 
     private void processFileRequest(FileRequest cloudMessage, ChannelHandlerContext ctx) throws Exception {
         Path path = CURRENT_DIR.resolve(cloudMessage.getFileName());
+        log.debug("Process file" + path.toString());
         ctx.writeAndFlush(new FileMessage(path)).sync();
     }
 
