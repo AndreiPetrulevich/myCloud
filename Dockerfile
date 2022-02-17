@@ -13,7 +13,7 @@ COPY ./server/pom.xml server
 COPY ./core/src core/src
 COPY ./core/pom.xml core
 
-RUN mvn clean package
+RUN mvn clean package -pl server -am
 
 FROM openjdk:15-alpine3.12
 

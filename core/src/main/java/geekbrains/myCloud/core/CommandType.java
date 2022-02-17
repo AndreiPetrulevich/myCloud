@@ -6,5 +6,7 @@ public enum CommandType {
     LIST,
     GO_TO,
     DELETE,
-    RENAME
+    RENAME,
+    REG,
+    LOGIN
 }
