@@ -7,7 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="myCloud" />
+        <module name="server" />
+        <module name="core" />
+        <module name="client" />
       </profile>
     </annotationProcessing>
   </component>
