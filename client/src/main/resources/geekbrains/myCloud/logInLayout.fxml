@@ -11,7 +11,8 @@
 <?import javafx.scene.layout.VBox?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="150.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.scene.control.PasswordField?>
+<AnchorPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="150.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="geekbrains.myCloud.LoginForm">
    <children>
       <BorderPane prefHeight="150.0" prefWidth="300.0">
@@ -26,8 +27,8 @@
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
                      <children>
-                        <Label text="Password:" />
-                        <TextField fx:id="password" prefHeight="26.0" prefWidth="200.0" />
+                        <Label text="Password:"/>
+                        <PasswordField fx:id="password" prefHeight="26.0" prefWidth="200.0"  />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="50.0" prefWidth="300.0" spacing="10.0" VBox.vgrow="NEVER">

@@ -1,11 +1,12 @@
 package geekbrains.myCloud.core;
 
-public class GoToDir implements CloudMessage {
+public class GoToDir extends AuthorizedCloudMessage {
 
     private final String directory;
 
 
-    public GoToDir(String directory) {
+    public GoToDir(String token, String directory) {
+        this.token = token;
         this.directory = directory;
     }
 

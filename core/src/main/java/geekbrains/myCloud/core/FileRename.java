@@ -3,11 +3,12 @@ package geekbrains.myCloud.core;
 import lombok.Data;
 
 @Data
-public class FileRename implements CloudMessage{
+public class FileRename extends AuthorizedCloudMessage{
     private final String oldFileNamePath;
     private final String newFileNamePath;
 
-    public FileRename(String oldFileName, String newFileName) {
+    public FileRename(String token, String oldFileName, String newFileName) {
+        this.token = token;
         this.oldFileNamePath = oldFileName;
         this.newFileNamePath = newFileName;
     }

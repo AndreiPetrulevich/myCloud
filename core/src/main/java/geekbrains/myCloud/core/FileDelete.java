@@ -3,12 +3,11 @@ package geekbrains.myCloud.core;
 import lombok.Data;
 
 @Data
-public class FileDelete implements CloudMessage{
-
-
+public class FileDelete extends AuthorizedCloudMessage{
     private final String pathToDeleteFile;
 
-    public FileDelete(String pathToDeleteFile) {
+    public FileDelete(String token, String pathToDeleteFile) {
+        this.token = token;
         this.pathToDeleteFile = pathToDeleteFile;
     }
 

@@ -1,8 +1,6 @@
 package geekbrains.myCloud;
 
-import geekbrains.myCloud.core.FileMessage;
-import geekbrains.myCloud.core.ListMessage;
-import geekbrains.myCloud.core.Rethrow;
+import geekbrains.myCloud.core.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
@@ -25,9 +23,11 @@ public class MainScreen implements ClientObserver {
     public TextField clientFilePath;
     public TextField serverFilePath;
     public Button serverPathUpButton;
+    public Runnable goToLoginForm;
 
     private Optional<Path> clientDir = null;
     private String serverDir = SERVER_ROOT_PATH;
+    private AlertErrorHandler alertErrorHandler = new AlertErrorHandler();
 
     private static final String SERVER_ROOT_PATH = "";
 
@@ -35,10 +35,11 @@ public class MainScreen implements ClientObserver {
         initMouseListeners();
 
         Client.shared.addObserver(this);
+        Client.shared.sendGoTo(SERVER_ROOT_PATH);
+    }
 
-        rootPane.getScene().getWindow().setOnCloseRequest(e -> {
-            Client.shared.removeObserver(this);
-        });
+    public void deinitialize() {
+        Client.shared.removeObserver(this);
     }
 
     private void initMouseListeners() {
@@ -80,7 +81,7 @@ public class MainScreen implements ClientObserver {
 
     public void uploadFile(ActionEvent actionEvent) throws IOException {
         String fileName = clientFilesList.getSelectionModel().getSelectedItem();
-        Client.shared.sendUpload(clientDir.get().resolve(fileName));
+        Client.shared.sendUpload(clientDir.get().resolve(fileName), serverDir);
     }
 
     public void downloadFile(ActionEvent actionEvent) throws IOException {
@@ -146,7 +147,7 @@ public class MainScreen implements ClientObserver {
         });
     }
 
-    public void handleFileMessage(FileMessage message) {
+    public void handleFileMessage(FileUploadMessage message) {
         try {
             Optional<Path> fullPath = clientDir.map(p -> p.resolve(message.getFileName()));
             Rethrow.of(fullPath).ifPresent(path -> {
@@ -155,6 +156,19 @@ public class MainScreen implements ClientObserver {
             Platform.runLater(this::updateClientUI);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void handleSuccessMessage(AuthenticationSuccess message) {
+
+    }
+
+    @Override
+    public void handleErrorMessage(ErrorMessage message) {
+        alertErrorHandler.handle(message.getError());
+        if (message.getError() == ErrorType.AUTHORIZATION_FAILED && goToLoginForm != null) {
+            Platform.runLater(goToLoginForm);
         }
     }
 }

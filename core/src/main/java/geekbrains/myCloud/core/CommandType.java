@@ -1,12 +1,15 @@
 package geekbrains.myCloud.core;
 
 public enum CommandType {
-    FILE,
+    FILE_DOWNLOAD,
+    FILE_UPLOAD,
     FILE_REQUEST,
     LIST,
     GO_TO,
     DELETE,
     RENAME,
     REG,
-    LOGIN
+    LOGIN,
+    ERROR,
+    AUTH_SUCCESS
 }
